@@ -1,10 +1,10 @@
 {
   "name": "nowplaying",
   "version": "0.0.1",
-  "description": "playing music title post to slack",
-  "main": "index.js",
+  "description": "Set the information of the song you are playing to the status of Slack.",
+  "main": "./src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/main.js"
   },
   "author": "windyakin",
   "license": "MIT",
