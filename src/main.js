@@ -4,7 +4,7 @@ const AppleScript = Promise.promisifyAll(require('applescript'));
 
 const logger = Log4js.getLogger();
 
-const Slack = require(`${__dirname}/slack.js`);
+const Slack = require('./module/slack.js');
 
 const EmptyStatus = { status_emoji: '', status_text: '' };
 
@@ -12,7 +12,8 @@ require('dotenv').config({ path: './.environment' });
 
 (() => {
   (function loop(oldStatus) {
-    AppleScript.execFileAsync(`${__dirname}/nowplaying.js`)
+    let nextStatus = oldStatus;
+    AppleScript.execFileAsync(`${__dirname}/jxa/nowplaying.js`)
       .then((str) => {
         const playing = JSON.parse(str);
         if (!(playing.title && playing.artist)) {
@@ -32,14 +33,14 @@ require('dotenv').config({ path: './.environment' });
         if (JSON.stringify(status) === JSON.stringify(oldStatus)) {
           return Promise.reject('Playing song was not changed');
         }
-        oldStatus = status;
+        nextStatus = status;
         return status;
       })
       .then(status => Slack.updateStatusAsync(status))
       .catch(e => e)
       .then((data) => {
         logger.debug(data);
-        setTimeout(() => loop(oldStatus), 15000);
+        setTimeout(() => loop(nextStatus), 15000);
       });
   }(EmptyStatus));
 })();
