@@ -7,7 +7,6 @@ var music = {
 	'title': null,
 	'artist': null,
 	'album': null,
-	'time': null
 };
 
 for (var i = 0; i < apps.length; i++) {
@@ -17,19 +16,15 @@ for (var i = 0; i < apps.length; i++) {
 			music['title']  = iTunes.currentTrack.name();
 			music['artist'] = iTunes.currentTrack.artist();
 			music['album']  = iTunes.currentTrack.album();
-			music['time']   = iTunes.currentTrack.time();
 			break;
 		}
 	}
-	else if (apps[i] === 'VOX')
-	{
+	else if (apps[i] === 'VOX') {
 		const Vox = Application('VOX');
 		if (Vox.playerState() !== 0) {
 			music['title']  = Vox.track();
 			music['artist'] = Vox.artist();
 			music['album']  = Vox.album();
-			var time = Vox.totalTime();
-			music['time']   = parseInt(time/60, 10) + ':' + ("0" + parseInt(time%60, 10)).slice(-2);
 			break;
 		}
 	}
