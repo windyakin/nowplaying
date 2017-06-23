@@ -28,6 +28,15 @@ for (var i = 0; i < apps.length; i++) {
 			break;
 		}
 	}
+	else if (apps[i] === 'Radiant Player') {
+		const RadiantPlayer = Application('Radiant Player');
+		if (RadiantPlayer.playerState() === 2) {
+			music['title']  = RadiantPlayer.currentSongName();
+			music['artist'] = RadiantPlayer.currentSongArtist();
+			music['album']  = RadiantPlayer.currentSongAlbum();
+			break;
+		}
+	}
 }
 
 JSON.stringify(music);
