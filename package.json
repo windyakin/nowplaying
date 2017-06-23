@@ -4,7 +4,8 @@
   "description": "Set the information of the song you are playing to the status of Slack.",
   "main": "./src/main.js",
   "scripts": {
-    "start": "node src/main.js"
+    "start": "node src/main.js",
+    "linter": "eslint src/**/*.js"
   },
   "author": "windyakin",
   "license": "MIT",
