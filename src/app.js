@@ -1,20 +1,13 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { ipcMain } = require('electron');
+const menubar = require('menubar');
 
-let window;
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+const mb = menubar({
+  preloadWindow: true,
+  index: `file://${__dirname}/html/index.html`,
 });
 
-app.on('ready', () => {
-  window = new BrowserWindow({ width: 800, height: 600 });
-  window.loadURL(`file://${__dirname}/html/index.html`);
-
-  window.on('closed', () => {
-    window = null;
-  });
+mb.on('ready', () => {
+  console.log('test');
 });
 
 ipcMain.on('requsetMessage', (ev, message) => {

@@ -20,7 +20,7 @@
 </div>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer;
+const { ipcRenderer } = require('electron');
 class Main {
   static sendInputToken() {
     const val = document.getElementById('token').value;
