@@ -1,51 +1,37 @@
-const Bluebird = require('bluebird');
 const Log4js = require('log4js');
-const AppleScript = Bluebird.promisifyAll(require('applescript'));
 
 const logger = Log4js.getLogger();
 const Slack = require('./module/slack.js');
+const NowPlaying = require('./module/now-playing.js');
 const TextFormatter = require('./module/text-formatter.js');
 
 global.EmptyStatus = { status_emoji: '', status_text: '' };
 
 require('dotenv').config({ path: './.environment' });
 
-(() => {
-  (function loop(oldStatus) {
+(async () => {
+  await (async function loop(oldStatus) {
     let nextStatus = oldStatus;
+    let status = global.EmptyStatus;
 
-    AppleScript.execFileAsync(`${__dirname}/jxa/nowplaying.js`)
+    try {
+      status = TextFormatter.playing2Status(await NowPlaying.getPlayingInfo());
+    } catch (err) {
+      logger.error(err);
+    }
 
-      .then(str => TextFormatter.playing2Status(str))
-      .catch((err) => {
-        logger.error(err);
-        return global.EmptyStatus;
-      })
+    if (JSON.stringify(status) === JSON.stringify(oldStatus)) {
+      if (status === global.EmptyStatus) {
+        logger.debug('Not playing song now');
+      } else {
+        logger.debug('Playing song was not changed');
+      }
+    } else {
+      const response = JSON.parse(await Slack.updateStatusAsync(status));
+      logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
+    }
+    nextStatus = status;
 
-      .then((status) => {
-        // 前のステータスと同じのときはリクエストを送らないようにする
-        if (JSON.stringify(status) === JSON.stringify(oldStatus)) {
-          if (status === global.EmptyStatus) {
-            return Promise.reject('Not playing song now');
-          }
-          return Promise.reject('Playing song was not changed');
-        }
-        nextStatus = status;
-        return status;
-      })
-
-      .then(status => Slack.updateStatusAsync(status))
-
-      .then((data) => {
-        const json = JSON.parse(data);
-        logger.info(`Status set: ${json.profile.status_text || '(clear)'}`);
-      })
-      .catch((e) => {
-        logger.debug(e);
-      })
-
-      .then(() => {
-        setTimeout(() => loop(nextStatus), 10000);
-      });
+    await setTimeout(() => loop(nextStatus), 10000);
   }(global.EmptyStatus));
 })();
