@@ -3,7 +3,7 @@ const menubar = require('menubar');
 
 const mb = menubar({
   preloadWindow: true,
-  index: `file://${__dirname}/html/index.html`,
+  index: `file://${__dirname}/view/index.html`,
 });
 
 mb.on('ready', () => {

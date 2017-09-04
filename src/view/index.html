@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+<input type="text" id="token">
+<button onclick="Main.sendInputToken()">Save</button>
+<script>
+const { ipcRenderer } = require('electron');
+class Main {
+  static sendInputToken() {
+    const val = document.getElementById('token').value;
+    ipcRenderer.send('requsetMessage', val);
+  }
+}
+</script>
+</body>
+</html>
