@@ -1,11 +1,11 @@
 const request = require('request-promise');
 
 module.exports = class Slack {
-  static updateStatusAsync(status) {
+  static updateStatusAsync(status, token) {
     return request.post({
       url: 'https://slack.com/api/users.profile.set',
       form: {
-        token: process.env.SLACK_TOKEN,
+        token,
         profile: JSON.stringify(status),
       },
     });

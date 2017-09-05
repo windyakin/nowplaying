@@ -9,9 +9,8 @@ global.EmptyStatus = { status_emoji: '', status_text: '' };
 
 require('dotenv').config({ path: './.environment' });
 
-(async () => {
+(async (token) => {
   await (async function loop(oldStatus) {
-    let nextStatus = oldStatus;
     let status = global.EmptyStatus;
 
     try {
@@ -27,11 +26,10 @@ require('dotenv').config({ path: './.environment' });
         logger.debug('Playing song was not changed');
       }
     } else {
-      const response = JSON.parse(await Slack.updateStatusAsync(status));
+      const response = JSON.parse(await Slack.updateStatusAsync(status, token));
       logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
     }
-    nextStatus = status;
 
-    await setTimeout(() => loop(nextStatus), 10000);
+    await setTimeout(() => loop(status), 5000);
   }(global.EmptyStatus));
-})();
+})(process.env.SLACK_TOKEN);
