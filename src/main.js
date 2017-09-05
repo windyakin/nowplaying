@@ -30,6 +30,6 @@ require('dotenv').config({ path: './.environment' });
       logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
     }
 
-    await setTimeout(() => loop(status), 5000);
+    await setTimeout(() => loop(status), 10000);
   }(global.EmptyStatus));
 })(process.env.SLACK_TOKEN);
