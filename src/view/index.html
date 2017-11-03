@@ -7,12 +7,20 @@
 <body>
 <input type="text" id="token">
 <button onclick="Main.sendInputToken()">Save</button>
+<button onclick="Main.clear()">Clear</button>
+<button onclick="Main.quit()">Quit</button>
 <script>
 const { ipcRenderer } = require('electron');
 class Main {
   static sendInputToken() {
     const val = document.getElementById('token').value;
-    ipcRenderer.send('requsetMessage', val);
+    ipcRenderer.send('sendToken', val);
+  }
+  static clear() {
+    ipcRenderer.send('clearToken');
+  }
+  static quit() {
+    ipcRenderer.send('quit');
   }
 }
 </script>

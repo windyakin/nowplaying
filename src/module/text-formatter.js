@@ -2,7 +2,7 @@ module.exports = class TextFormatter {
   static playing2Status(json) {
     const playing = JSON.parse(json);
     if (!(playing.title && playing.artist)) {
-      return global.EmptyStatus;
+      return null;
     }
     let status = `${playing.title} / ${playing.artist}`;
     if (status.length > 100) {

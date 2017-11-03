@@ -2,7 +2,7 @@ const Log4js = require('log4js');
 
 const logger = Log4js.getLogger();
 const Slack = require('./module/slack.js');
-const NowPlaying = require('./module/now-playing.js');
+const PlayingInfoGetter = require('./module/playing-info-getter.js');
 const TextFormatter = require('./module/text-formatter.js');
 
 global.EmptyStatus = { status_emoji: '', status_text: '' };
@@ -11,13 +11,15 @@ require('dotenv').config({ path: './.environment' });
 
 (async (token) => {
   await (async function loop(oldStatus) {
-    let status = global.EmptyStatus;
+    let playing;
 
     try {
-      status = TextFormatter.playing2Status(await NowPlaying.getPlayingInfo());
+      playing = await PlayingInfoGetter.execute();
     } catch (err) {
       logger.error(err);
     }
+
+    const status = TextFormatter.playing2Status(playing) || global.EmptyStatus;
 
     if (JSON.stringify(status) === JSON.stringify(oldStatus)) {
       if (status === global.EmptyStatus) {
@@ -26,8 +28,12 @@ require('dotenv').config({ path: './.environment' });
         logger.debug('Playing song was not changed');
       }
     } else {
-      const response = JSON.parse(await Slack.updateStatusAsync(status, token));
-      logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
+      try {
+        const response = JSON.parse(await Slack.updateStatusAsync(status, token));
+        logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
+      } catch (err) {
+        logger.error(err);
+      }
     }
 
     await setTimeout(() => loop(status), 10000);
