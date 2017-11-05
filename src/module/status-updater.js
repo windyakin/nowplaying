@@ -9,6 +9,7 @@ module.exports = class StatusUpdater {
   constructor(token) {
     this.token = token;
     this.EmptyStatus = { status_emoji: '', status_text: '' };
+    this.execute(this.EmptyStatus);
   }
 
   get token() {
@@ -22,8 +23,12 @@ module.exports = class StatusUpdater {
     this.Token = token;
   }
 
-  isNotSetToken() {
-    return this.token === null;
+  async setTokenWithValid(token) {
+    if (token !== null) {
+      const response = await Slack.testAuthorizeAsync(token);
+      if (!response.ok) throw Error('Invalid token');
+    }
+    this.token = token;
   }
 
   async execute(oldStatus) {
@@ -57,7 +62,15 @@ module.exports = class StatusUpdater {
     } catch (err) {
       logger.error(err);
     }
-    logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
+    try {
+      if (response.ok) {
+        logger.info(`Status set: ${response.profile.status_text || '(clear)'}`);
+      } else {
+        throw Error(response);
+      }
+    } catch (err) {
+      logger.error(err);
+    }
   }
 
   async clearStatus() {

@@ -4,8 +4,9 @@ const menubar = require('menubar');
 const Storage = Bluebird.promisifyAll(require('electron-json-storage'));
 
 const StatusUpdater = require('./module/status-updater.js');
+const Slack = require('./module/slack.js');
 
-let su;
+let statusUpdater;
 
 const mb = menubar({
   preloadWindow: true,
@@ -22,14 +23,13 @@ const startStatusUpdate = async () => {
   }
   console.log(token);
   if (token !== null) {
-    su = new StatusUpdater(token);
-    su.execute();
+    statusUpdater = new StatusUpdater(token);
   }
 };
 
 const setTokenToStrage = async (token) => {
-  if (su !== undefined && !su.token !== null) {
-    su.token = null;
+  if (statusUpdater !== undefined && statusUpdater.token !== null) {
+    statusUpdater.token = null;
   }
   await Storage.setAsync('config', token);
   if (token !== null) {
@@ -43,6 +43,15 @@ mb.on('ready', async () => {
 
 ipcMain.on('sendToken', async (ev, token) => {
   try {
+    const response = await Slack.testAuthorizeAsync('token');
+    if (!response.ok) {
+      ev.sender.send('sendTokenResponse', 'Token Invalid');
+      throw Error();
+    }
+  } catch (e) {
+    return;
+  }
+  try {
     await setTokenToStrage(token);
   } catch (e) {
     ev.sender.send('sendTokenResponse', e);
@@ -55,8 +64,8 @@ ipcMain.on('clearToken', () => {
 });
 
 ipcMain.on('quit', async () => {
-  if (su !== undefined && !su.token !== null) {
-    await su.clearStatus();
+  if (statusUpdater !== undefined && !statusUpdater.token !== null) {
+    await statusUpdater.clearStatus();
   }
   mb.app.quit();
 });

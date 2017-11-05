@@ -10,4 +10,13 @@ module.exports = class Slack {
       },
     });
   }
+
+  static testAuthorizeAsync(token) {
+    return request.post({
+      url: 'https://slack.com/api/auth.test',
+      form: {
+        token,
+      },
+    });
+  }
 };
